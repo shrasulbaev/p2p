@@ -10,7 +10,7 @@ class CashoutCreate:
         }
 
     def create_cashout(self, amount, currency, method, customer_id, email, external_transaction_id, card_number, cardholder_name, splittable):
-        # Проверяем аргументы
+
         if any(arg is None for arg in (amount, currency, method, customer_id, email, external_transaction_id, card_number, cardholder_name, splittable)):
             raise ValueError("Неправильные аргументы. Все аргументы должны быть указаны.")
 
@@ -31,19 +31,16 @@ class CashoutCreate:
 
         try:
             response = requests.post(url, headers=self.headers, json=data)
-            response.raise_for_status()  # Вызвать исключение для HTTP-ошибок (например, 404, 500)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            # Обработка ошибок, связанных с запросом, например, ошибок соединения
             print(f"Ошибка запроса: {e}")
             return None
         except requests.exceptions.HTTPError as e:
-            # Обработка HTTP-ошибок (например, 404, 500)
             print(f"HTTP-ошибка: {e}")
         except Exception as e:
-            # Обработка других исключений
             print(f"Произошла ошибка: {e}")
             return None
 
-        # Вывести содержимое ответа сервера
-        print(response.text)  # Это выведет содержимое ответа в виде строки
+
+        print(response.text) 
         return response

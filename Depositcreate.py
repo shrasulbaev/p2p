@@ -41,13 +41,12 @@ class DepositCreate:
         return None
 
 
-    def update_transaction(self, status, amount_to_enroll, payment_proofs):
+    def update_transaction(self, status, payment_proofs):
         if self.transaction_id is not None:
             url = f'{self.base_url}/v1/p2p/transaction/{self.transaction_id}/update'
             data = {
                 "prolongUnpaidSiblingsSec": 0,
                 "status": status,
-                "amount_to_enroll": amount_to_enroll,
                 "payment_proofs": payment_proofs
             }
             response = requests.post(url, headers=self.headers, json=data)  
