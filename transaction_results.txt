@@ -1,7 +1,14 @@
-Total CASHOUT Transactions: 17
-Total DEPOSIT Transactions: 21
-CASHOUT ACTIVE: 0 (0.00%)
-CASHOUT COMPLETED: 17 (100.00%)
-DEPOSIT UNPAID: 0 (0.00%)
-DEPOSIT PAID: 0 (0.00%)
-DEPOSIT COMPLETED: 21 (100.00%)
+Total CASHOUT Transactions (Yesterday): 4000
+Total CASHOUT Transactions (Today): 999
+CASHOUT ACTIVE (Yesterday): 3 (0.07%)
+CASHOUT COMPLETED (Yesterday): 3997 (99.92%)
+CASHOUT ACTIVE (Today): 65 (6.51%)
+CASHOUT COMPLETED (Today): 934 (93.49%)
+Total DEPOSIT Transactions (Yesterday): 4000
+Total DEPOSIT Transactions (Today): 1010
+DEPOSIT UNPAID (Yesterday): 1 (0.03%)
+DEPOSIT PAID (Yesterday): 0 (0.00%)
+DEPOSIT COMPLETED (Yesterday): 3999 (99.98%)
+DEPOSIT UNPAID (Today): 10 (0.99%)
+DEPOSIT PAID (Today): 0 (0.00%)
+DEPOSIT COMPLETED (Today): 1000 (99.01%)

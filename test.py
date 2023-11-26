@@ -3,6 +3,9 @@ from Depositcreate import DepositCreate
 import time
 import random
 from db import TransactionAnalyzer
+import concurrent.futures
+import asyncio
+
 
 analyzer = TransactionAnalyzer(
     username='srasulbaev',
@@ -13,13 +16,13 @@ analyzer = TransactionAnalyzer(
 )
 
 # Cashout
-customers_ids_cashout = [str(random.randint(100, 500)) for _ in range(5000)]
-amounts_cashout = [str(i * 20000) for i in range(1, 7)]
-api_cashout = CashoutCreate('https://api-stage-p2p-k8s.apimb.com', api_key='test', api_sign='test')
+customers_ids_cashout = [str(random.randint(1, 5000)) for _ in range(1000)]
+# amounts_cashout = 20000
+api_cashout = CashoutCreate('https://api-stage-p2p-k8s.apimb.com', api_key='auto', api_sign='auto')
 
 with open('request_log_cashout.txt', 'w') as log_file_cashout:
     for customer_id in customers_ids_cashout:
-        amount = random.choice(amounts_cashout)
+        amount = random.randint(1,3)*20000
         splittable = random.choice([True, False])
         external_transaction_id_cashout = f"1000{random.randint(0, 999)}"
 
@@ -47,57 +50,57 @@ with open('request_log_cashout.txt', 'w') as log_file_cashout:
         else:
             log_file_cashout.write("Ошибка\n")
 
-        time.sleep(random.uniform(1, 2))
+        # time.sleep(1)
 
-        analyzer.analyze_and_write_to_file('transaction_results.txt')
 
 # Deposit
-api_deposit = DepositCreate('https://api-stage-p2p-k8s.apimb.com', 'test', 'test')
-customers_ids_deposit = [str(random.randint(501, 999)) for _ in range(50)]
+api_deposit = DepositCreate('https://api-stage-p2p-k8s.apimb.com', 'auto', 'auto')
+customers_ids_deposit = [str(random.randint(5001, 99999)) for _ in range(1000)]
+max_concurrent_deposits = 7
 
-with open('request_log_deposit.txt', 'a') as log_file_deposit:
-    for customer_id in customers_ids_deposit:
-        email_deposit = f"example@email.com"
-        external_transaction_id_deposit = f"1000{random.randint(0, 999)}"
+async def process_customer_deposit(customer_id):
+    email_deposit = f"example@email.com"
+    external_transaction_id_deposit = f"1000{random.randint(0, 999)}"
+    # amount_deposit = 20000
 
-        amount_deposit = [str(i * 20000) for i in range(1, 7)]
+    start_time_deposit = time.time()
+    transaction_id_deposit = api_deposit.create_deposit(
+        amount = random.randint(1,3)*20000,
+        currency='UZS',
+        method='uzcard',
+        customer_id=customer_id,
+        email=email_deposit,
+        external_transaction_id=external_transaction_id_deposit
+    )
+    end_time_deposit = time.time()
+    execution_time_deposit = end_time_deposit - start_time_deposit
 
-        start_time_deposit = time.time()
-        transaction_id_deposit = api_deposit.create_deposit(
-            amount=random.choice(amount_deposit),
-            currency='UZS',
-            method='uzcard',
-            customer_id=customer_id,
-            email=email_deposit,
-            external_transaction_id=external_transaction_id_deposit
-        )
-        end_time_deposit = time.time()
-        execution_time_deposit = end_time_deposit - start_time_deposit
-
+    with open('request_log_deposit.txt', 'a') as log_file_deposit:
         log_file_deposit.write(f"Создание депозита\n")
         log_file_deposit.write(f"customer_id {customer_id}: время выполнения {execution_time_deposit} секунд\n")
-        
+
         if transaction_id_deposit is not None:
             log_file_deposit.write(f"Ответ сервера: {transaction_id_deposit}\n")
             log_file_deposit.write(f"Номер: {transaction_id_deposit}\n")
 
             update_status_deposit = 'PAID'
-            update_payment_proofs_deposit = [
-                {
-                    "type": "string",
-                    "data": "string"
-                }
-            ]
+            update_payment_proofs_deposit = [{"type": "string", "data": "string"}]
             api_deposit.update_transaction(update_status_deposit, update_payment_proofs_deposit)
-            time.sleep(random.uniform(1, 2))
 
-            update_status2_deposit = 'COMPLETED'
-            api_deposit.update_transaction(update_status2_deposit, update_payment_proofs_deposit)
-            time.sleep(random.uniform(1, 2))
-        else:
-            log_file_deposit.write("Ошибка: Транзакция не была создана\n")
+            update_status_completed = 'COMPLETED'
+            api_deposit.update_transaction(update_status_completed, update_payment_proofs_deposit)
 
-        analyzer.analyze_and_write_to_file('transaction_results.txt')
+async def main():
+    tasks = [process_customer_deposit(customer_id) for customer_id in customers_ids_deposit]
+
+    semaphore = asyncio.Semaphore(max_concurrent_deposits)
+    async with semaphore:
+        await asyncio.gather(*tasks)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+analyzer.analyze_and_write_to_file('transaction_results.txt')
 
 analyzer.close_connection()
 
